@@ -21,7 +21,7 @@ const Index = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.post("/auth/login", { email, password });
+      const response = await api.post("/api/auth/login", { email, password });
       const { user, token } = response.data;
       
       setUser(user);
