@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import { toast } from "sonner";
+import api from "@/lib/api";
 
 const Index = () => {
   const [email, setEmail] = useState("");
@@ -19,29 +20,25 @@ const Index = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Mock login for now since backend is not yet implemented
-    // In a real scenario, this would call the API
-    setTimeout(() => {
-      if (email === "padilha.ctt@gmail.com" && password === "mp469535") {
-        const masterUser = {
-          id: "1",
-          nome: "Master Admin",
-          email: "padilha.ctt@gmail.com",
-          role: "master_admin" as const,
-          tenant_id: null,
-          pode_ver_financeiro: true,
-          ativo: true,
-          created_at: new Date().toISOString(),
-        };
-        setUser(masterUser);
-        setToken("mock-jwt-token");
-        toast.success("Bem-vindo ao Mudali!");
+    try {
+      const response = await api.post("/auth/login", { email, password });
+      const { user, token } = response.data;
+      
+      setUser(user);
+      setToken(token);
+      toast.success("Bem-vindo ao Mudali!");
+      
+      if (user.role === "master_admin") {
         navigate("/admin");
       } else {
-        toast.error("Credenciais inválidas");
+        navigate("/dashboard");
       }
+    } catch (error: any) {
+      console.error("Login error:", error);
+      toast.error(error.response?.data?.message || "Erro ao realizar login");
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
